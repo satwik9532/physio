@@ -73,7 +73,6 @@ def Reg_physio(request):
 
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def get_physio(request,id):
    
     

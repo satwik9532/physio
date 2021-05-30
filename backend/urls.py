@@ -21,13 +21,12 @@ from Physiotherapist import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register_physio/', views.Reg_physio),
-    path('get_physio/<int:id>', views.get_physio),
+   
    # path('api/login/',jwt_views.TokenObtainPairView.as_view(),name ='token_obtain_pair'),
     path('api/login/',views.login),
     path('api/logout/',views.logout),
     path('api/update_profile/',views.update_profile),
     path('api/profile',views.profile),
     path('api/token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
-   #  url('', include('microservices.urls')),
- #   url(r'admin/',services_admin_site.urls),
+  
 ]

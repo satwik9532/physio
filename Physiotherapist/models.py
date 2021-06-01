@@ -51,6 +51,14 @@ class pp_physiotherapist_master(models.Model):
     #     instance.pp_physiotherapist_master.save()
         
             
+
+
+class pp_otp(models.Model):
+    email     = models.EmailField()
+    otp       = models.IntegerField()  
+    created_at = models.TimeField( auto_now_add=True)       
+    class Meta:
+        db_table = 'pp_otp' 
         
     
             

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Physiotherapist.models import pp_physiotherapist_master
+from Physiotherapist.models import pp_physiotherapist_master,pp_otp
 import re
 
 
@@ -70,3 +70,9 @@ class pp_physiotherapist_masterSerializer(serializers.ModelSerializer):
             
         raise serializers.ValidationError("city name should only contain characters ")
  
+
+
+class pp_otpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = pp_otp
+        fields = '__all__'

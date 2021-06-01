@@ -17,6 +17,9 @@ from django.contrib import admin
 from django.urls import path ,include
 from rest_framework_simplejwt import views as jwt_views
 from Physiotherapist import views
+from django.conf.urls import  handler500,handler404
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +30,13 @@ urlpatterns = [
     path('api/logout/',views.logout),
     path('api/update_profile/',views.update_profile),
     path('api/profile',views.profile),
+    path('api/validate_email/',views.validate_email),
+    path('api/validate_mobile/',views.validate_mobile),
+    path('api/email-varification/',views.otp_varification),
+    path('api/send/',views.mail),
     path('api/token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
+   
   
 ]
+handler500 = 'Physiotherapist.views.error_500'
+handler404 = 'Physiotherapist.views.error_404'

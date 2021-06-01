@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from Physiotherapist.models import pp_physiotherapist_master
+from Physiotherapist.models import pp_physiotherapist_master,pp_otp
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from Physiotherapist.serializers import pp_physiotherapist_masterSerializer
+from Physiotherapist.serializers import pp_physiotherapist_masterSerializer,pp_otpSerializer
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework import status
@@ -18,6 +18,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import exceptions
 import jwt , datetime
+from django.core.mail import send_mail
 
 
 
@@ -47,7 +48,21 @@ def Reg_physio(request):
         return Response(serializer.errors)
 
     serializer.save()
-
+    try:
+        otp = otpgen()
+        otp_data = {}
+        otp_data['otp'] = otp
+        otp_data['email'] = user_data['email']
+        otpserializer = pp_otpSerializer(data = otp_data)
+        if otpserializer.is_valid():
+            otpserializer.save()
+        else:
+            print(otpserializer.errors)    
+        send_mail('email varification',
+        'your otp is '+str(otp),'mishra.satwik9532@gmail.com',[user_data['email']],fail_silently=False)
+        
+    except:
+        return Response(status = status.HTTP_400_BAD_REQUEST)
 
     payload = {
         'id':user.id,
@@ -197,22 +212,88 @@ def update_profile(request):
 
 
 
+
+
+
+@csrf_exempt
+@api_view(['POST','GET'])
+def validate_email(request):
+
+    try:
+
+        if User.objects.filter(email = request.data['email']).exists():
+            return Response({'message':'email already exists'},status = status.HTTP_409_CONFLICT)
+
+        else:
+            return Response(status = status.HTTP_200_OK)     
+    except:
+        return Response(status = status.HTTP_400_BAD_REQUEST)            
+
+
+
+
         
+@csrf_exempt
+@api_view(['POST','GET'])
+def validate_mobile(request):
 
+    try:
+        if pp_physiotherapist_master.objects.filter(mobile_no = request.data['mobile_no']).exists():
+            return Response({'message':'mobile number already exists'},status = status.HTTP_409_CONFLICT)
+
+        else:
+            return Response(status = status.HTTP_200_OK)    
+    except:
+        return Response(status = status.HTTP_400_BAD_REQUEST)            
+
+
+
+        
+import random as r
+# function for otp generation
+def otpgen():
+    otp=""
+    for i in range(4):
+        otp+=str(r.randint(1,9))
+    return otp
 
 
 
 
 
    
-   
+@csrf_exempt
+@api_view(['POST','GET'])
+def mail(request):
+       otp = otpgen()
+       send_mail('hello , just for testing',
+       'your otp is'+str(otp),'mishra.satwik9532@gmail.com',[request.data['email']],fail_silently=False)
+       return Response(status = status.HTTP_200_OK)
 
 
 
 
-
-
-
-
-
+@csrf_exempt
+@api_view(['POST','GET'])
+def otp_varification(request):
     
+    if pp_otp.objects.filter(email = request.data['email']).exists():
+        data = pp_otp.objects.filter(email = request.data['email']).first()
+        serializer = pp_otpSerializer(data)
+        print(serializer.data)
+        if serializer.data['otp'] == request.data['otp']:
+            data.delete()
+            return Response({'message':'email varified'},status = status.HTTP_200_OK)
+        else:     
+            return Response({'msg':'wrong OTP'},status = status.HTTP_200_OK)
+    return Response({'msg':'error'})    
+
+
+from django.http import JsonResponse
+@csrf_exempt
+def error_500(request):
+    return JsonResponse({"message": "internal server error"}, status=500)
+
+@csrf_exempt    
+def error_404(request, exception):
+    return JsonResponse({"message": "invalide API"}, status=404)

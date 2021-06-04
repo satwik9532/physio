@@ -18,11 +18,13 @@ from django.urls import path ,include
 from rest_framework_simplejwt import views as jwt_views
 from Physiotherapist import views
 from django.conf.urls import  handler500,handler404
-
-
+from rest_framework_swagger.views import get_swagger_view
+from django.conf.urls import url
+schema_view = get_swagger_view(title='physip API')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+  #   path('doc', schema_view),
     path('register_physio/', views.Reg_physio),
    
    # path('api/login/',jwt_views.TokenObtainPairView.as_view(),name ='token_obtain_pair'),
@@ -35,8 +37,8 @@ urlpatterns = [
     path('api/email-varification/',views.otp_varification),
     path('api/send/',views.mail),
     path('api/token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
-   
   
 ]
 handler500 = 'Physiotherapist.views.error_500'
 handler404 = 'Physiotherapist.views.error_404'
+ 

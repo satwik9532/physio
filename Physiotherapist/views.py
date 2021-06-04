@@ -31,7 +31,8 @@ def Reg_physio(request):
     profile_data = request.data['profile']
 
     email = user_data['email']
-    password = user_data['password']
+    password = generate_password()
+    user_data['password'] = password
 
     user = UserSerializer(data=user_data)
 
@@ -59,7 +60,7 @@ def Reg_physio(request):
         else:
             print(otpserializer.errors)    
         send_mail('email varification',
-        'your otp is '+str(otp),'mishra.satwik9532@gmail.com',[user_data['email']],fail_silently=False)
+        'your password is '+password,'mishra.satwik9532@gmail.com',[user_data['email']],fail_silently=False)
         
     except:
         return Response(status = status.HTTP_400_BAD_REQUEST)
@@ -75,7 +76,8 @@ def Reg_physio(request):
     response.set_cookie(key='jwt',value=token,expires=datetime.datetime.utcnow()+datetime.timedelta(days=1),httponly=True)
 
     response.data={
-        'jwt':token
+        'jwt':token,
+        'role':'physio'
     }
     return response  
 
@@ -286,7 +288,7 @@ def otp_varification(request):
             return Response({'message':'email varified'},status = status.HTTP_200_OK)
         else:     
             return Response({'msg':'wrong OTP'},status = status.HTTP_200_OK)
-    return Response({'msg':'error'})    
+    return Response({'msg':'error'},status = status.HTTP_400_BAD_REQUEST)    
 
 
 from django.http import JsonResponse
@@ -297,3 +299,41 @@ def error_500(request):
 @csrf_exempt    
 def error_404(request, exception):
     return JsonResponse({"message": "invalide API"}, status=404)
+
+
+
+import array
+def generate_password():
+    MAX_LEN = 12
+    DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    LOCASE_CHARACTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+                     'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q',
+                     'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+                     'z']
+
+    UPCASE_CHARACTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                     'I', 'J', 'K', 'M', 'N', 'O', 'p', 'Q',
+                     'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
+                     'Z']                 
+    SYMBOLS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>',
+           '*', '(', ')', '<']
+
+    COMBINED_LIST = DIGITS + UPCASE_CHARACTERS + LOCASE_CHARACTERS + SYMBOLS
+    rand_digit = r.choice(DIGITS)
+    rand_upper = r.choice(UPCASE_CHARACTERS)
+    rand_lower = r.choice(LOCASE_CHARACTERS)
+    rand_symbol = r.choice(SYMBOLS)      
+    temp_pass = rand_digit + rand_upper + rand_lower + rand_symbol  
+    for x in range(MAX_LEN - 4):
+        temp_pass = temp_pass + r.choice(COMBINED_LIST)
+ 
+    # convert temporary password into array and shuffle to
+    # prevent it from having a consistent pattern
+    # where the beginning of the password is predictable
+        temp_pass_list = array.array('u', temp_pass)
+        r.shuffle(temp_pass_list)
+    password = ""
+    for x in temp_pass_list:
+        password = password + x        
+
+    return password                

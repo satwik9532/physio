@@ -2,15 +2,16 @@ from django.shortcuts import render
 from Physiotherapist.models import pp_physiotherapist_master,pp_otp
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
-from Physiotherapist.serializers import pp_physiotherapist_masterSerializer,pp_otpSerializer
+from rest_framework.decorators import api_view,schema
+from Physiotherapist.serializers import pp_physiotherapist_masterSerializer,pp_otpSerializer,mobileSerilizer
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from Auth.models import User
-from Auth.serializer import UserSerializer
+from Auth.serializer import UserSerializer ,emaiSerializer
+
 from django.db import transaction
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -19,11 +20,22 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import exceptions
 import jwt , datetime
 from django.core.mail import send_mail
+from rest_framework.schemas import AutoSchema
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 
 
 
+
+
+
+
+token_param_config = openapi.Parameter(None,in_ = openapi.IN_QUERY,description = 'Description',type = openapi.TYPE_STRING)
+user_response = openapi.Response('response description', {'message':'created'})
 @csrf_exempt
+@swagger_auto_schema(methods=['post'],request_body=pp_physiotherapist_masterSerializer)
 @api_view(['POST'])
 def Reg_physio(request):
   
@@ -65,18 +77,14 @@ def Reg_physio(request):
     except:
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
-    payload = {
-        'id':user.id,
-        }   
-
-    token =  jwt.encode(payload,'secret_key',algorithm='HS256')
+ 
    
     
     response = Response(status=status.HTTP_201_CREATED)   
-    response.set_cookie(key='jwt',value=token,expires=datetime.datetime.utcnow()+datetime.timedelta(days=1),httponly=True)
+  #  response.set_cookie(key='jwt',value=token,expires=datetime.datetime.utcnow()+datetime.timedelta(days=1),httponly=True)
 
     response.data={
-        'jwt':token,
+        'message':'user created',
         'role':'physio'
     }
     return response  
@@ -136,7 +144,10 @@ def profile(request):
 
 
 
+token_param_config = openapi.Parameter('first_name',in_ = openapi.IN_QUERY,description = 'Description',type = openapi.TYPE_STRING)
+user_response = openapi.Response('response description', {'message':'created'})
 @csrf_exempt
+@swagger_auto_schema(manual_parameters = [token_param_config],methods=['post'],request_body=UserSerializer)
 @api_view(['POST'])
 def login(request):
 
@@ -217,8 +228,11 @@ def update_profile(request):
 
 
 
+token_config = openapi.Parameter(None,in_ = openapi.IN_QUERY,description = 'Description',type = openapi.TYPE_STRING)
+user_response = openapi.Response('response description', {'message':'created'})
 @csrf_exempt
-@api_view(['POST','GET'])
+@swagger_auto_schema(manual_parameters = [token_param_config],methods=['post'],request_body=emaiSerializer)
+@api_view(['POST'])
 def validate_email(request):
 
     try:
@@ -236,7 +250,8 @@ def validate_email(request):
 
         
 @csrf_exempt
-@api_view(['POST','GET'])
+@swagger_auto_schema(methods=['post'],request_body=mobileSerilizer)
+@api_view(['POST'])
 def validate_mobile(request):
 
     try:
@@ -263,9 +278,10 @@ def otpgen():
 
 
 
-   
+token_param_config_ = openapi.Parameter('email',in_ = openapi.IN_QUERY,description = 'Description',type = openapi.TYPE_STRING)   
 @csrf_exempt
-@api_view(['POST','GET'])
+@swagger_auto_schema(manual_parameters = [token_param_config_],methods=['post'],request_body=pp_otpSerializer)
+@api_view(['POST'])
 def mail(request):
        otp = otpgen()
        send_mail('hello , just for testing',
@@ -276,7 +292,7 @@ def mail(request):
 
 
 @csrf_exempt
-@api_view(['POST','GET'])
+@api_view(['POST'])
 def otp_varification(request):
     
     if pp_otp.objects.filter(email = request.data['email']).exists():
@@ -337,3 +353,13 @@ def generate_password():
         password = password + x        
 
     return password                
+
+
+
+@csrf_exempt
+@api_view(['POST'])
+def reset_password(request):
+    pass
+
+
+

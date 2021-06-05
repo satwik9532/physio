@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,10 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
    # 'phonenumber_field',
+   
+    'drf_yasg',
     'rest_framework',
     'Auth',
     'Physiotherapist', 
-     'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -207,4 +209,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_PASSWORD = 'aman02/08/1999'
 
 
-#REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
+REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }

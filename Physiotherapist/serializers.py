@@ -76,3 +76,15 @@ class pp_otpSerializer(serializers.ModelSerializer):
     class Meta:
         model = pp_otp
         fields = '__all__'
+
+
+
+class mobileSerilizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = pp_physiotherapist_master
+        fields = ['mobile_no']         
+
+
+
+

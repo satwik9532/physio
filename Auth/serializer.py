@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['email','password']
 
     def create(self,validated_data):
         return User.objects.create_user(**validated_data)    
@@ -20,3 +20,9 @@ class UserSerializer(serializers.ModelSerializer):
     #     if not re.search(reg, value):
     #         raise serializers.ValidationError("please enter strong password")
     #     return value    
+
+
+class emaiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email']

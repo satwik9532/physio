@@ -26,3 +26,9 @@ class emaiSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email']
+
+
+class ResetPassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['password']

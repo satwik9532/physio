@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from Auth.models import User
-from Auth.serializer import UserSerializer ,emaiSerializer
+from Auth.serializer import UserSerializer ,emaiSerializer,ResetPassSerializer
 
 from django.db import transaction
 from django.contrib.auth import login, authenticate
@@ -175,9 +175,17 @@ def login(request):
     response.set_cookie(key='jwt',value=token,expires=datetime.datetime.utcnow()+datetime.timedelta(days=1),httponly=True)
     request.session['id']=user.id
     request.session.set_expiry(86400)
+    first_time = False
+    if user.last_login is None:
+        first_time = True
+
+    user.last_login = datetime.datetime.utcnow()
+    user.save()
+        
 
     response.data={
-        'jwt':token
+        'jwt':token,
+        'first_time':first_time
     }
     return response     
 
@@ -357,9 +365,27 @@ def generate_password():
 
 
 @csrf_exempt
+@swagger_auto_schema(methods=['post'],request_body=ResetPassSerializer)
 @api_view(['POST'])
 def reset_password(request):
-    pass
+    token = request.COOKIES.get('jwt')
+    #sess = request.session['id']
+   
+
+    if not token:
+       raise exceptions.AuthenticationFailed('unauthenticated')
+
+    try:
+        payload = jwt.decode(token,'secret_key',algorithms=['HS256'])  
+
+    except jwt.ExpiredSignatureError:
+       raise exceptions.AuthenticationFailed('unauthenticated')
+
+    user = User.objects.filter(id=payload['id']).first()  
+    user.set_password (request.data['password'])
+    user.save()
+    return Response({'message':'password change'},status = status.HTTP_200_OK)
+    
 
 
 

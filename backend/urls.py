@@ -61,6 +61,7 @@ urlpatterns = [
     path('api/validate_email/',views.validate_email),
     path('api/validate_mobile/',views.validate_mobile),
     path('api/email-varification/',views.otp_varification),
+    path('api/reset-password/',views.reset_password),
     path('api/send/',views.mail),
    
   
